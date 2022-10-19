@@ -10,3 +10,7 @@ services:
       - API_ID=YOURAPIID
       - API_HASH=YOURAPIHASH
       - SESSION=YOURSESSION
+    volumes:
+      - ./user_list.txt:/opt/
+volumes:
+  herold_bot:
