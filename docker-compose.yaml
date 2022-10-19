@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+  herold_bot:
+    container_name: herold_bot
+    image: h0d0user/herold_bot:latest
+    restart: always
+    network_mode: host
+#    environment:
+#      - API_TOKEN=YOURTOKEN
