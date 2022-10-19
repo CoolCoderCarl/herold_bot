@@ -6,11 +6,13 @@ services:
     image: h0d0user/herold_bot:latest
     restart: always
     network_mode: host
+    stdin_open: true
+    tty: true
     environment:
       - API_ID=YOURAPIID
       - API_HASH=YOURAPIHASH
       - SESSION=YOURSESSION
     volumes:
-      - ./user_list.txt:/opt/
+      - /opt/:/root/herold_tob/user_list.txt
 volumes:
   herold_bot:
