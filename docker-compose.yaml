@@ -13,6 +13,7 @@ services:
       - API_HASH=YOURAPIHASH
       - SESSION=YOURSESSION
     volumes:
-      - /opt/:/root/herold_tob/user_list.txt
+      - /opt/:/root/herold_bot/user_list.txt
+      - /opt/:/root/herold_bot/JustTalk.session
 volumes:
   herold_bot:

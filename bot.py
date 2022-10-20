@@ -14,19 +14,13 @@ client = TelegramClient(SESSION, API_ID, API_HASH)
 
 IGNORED_FILE = "user_list.txt"
 
-answers = [
-    """
-Hello. This is an auto-generated answer just for you. \n 
-
+answer = """
+Hello. This is an auto-generated answer just for you. \n
 You have been pseudorandomly selected to test a new bot. \n
-
-Congratulations, it's absolutely free. \n
-
+Congratulations, it's absolutely free ! \n
 Soon I will come to you, but it's not certain. \n
-
 GL HF
 """
-]
 
 
 # Logging
@@ -48,6 +42,7 @@ def load_user_ids_from_file() -> List[int]:
     try:
         with open(IGNORED_FILE, "r") as users_ids_file:
             user_ids = [int(u_ids) for u_ids in users_ids_file.read().split()]
+            logging.info("Uploaded from the file done successfully.")
             return user_ids
     except FileNotFoundError as file_not_found_err:
         logging.error(file_not_found_err)
@@ -55,26 +50,26 @@ def load_user_ids_from_file() -> List[int]:
 
 @client.on(events.NewMessage)
 async def handle_new_message(event):
-
     user_ids = load_user_ids_from_file()
-    print(user_ids)
-
+    logging.info(f"Users id uploaded: {user_ids}")
     try:
-        from_user = await event.client.get_entity(event.from_id)
-        print(from_user)
-        # print(from_user.first_name)
+        user_data = await event.client.get_entity(event.from_id)
+        # Show usernames by id
+        logging.info(user_data)
+        # logging.info(user_data.first_name)
         # print(type(from_user.id))
 
-        if from_user.id in user_ids:
-            logging.info(event.message)
+        if user_data.id in user_ids:
+            logging.info(
+                f"User with name {user_data.first_name} - with ID: {user_data.id} - send message: {event.message}"
+            )
             logging.info(event.message.message)
+            logging.info("Waiting for answer...")
             await asyncio.sleep(random.randrange(3, 15))
-            if random.choice([True, False]):
-                i, s = random.randrange(2, 5), random.choice(answers)
-                async with client.action(from_user.id, "typing"):
-                    await asyncio.sleep(i)
-                    await client.send_message(from_user.id, s)
-                    logging.info("Message was sent.")
+            async with client.action(user_data.id, "typing"):
+                await asyncio.sleep(random.randrange(2, 5))
+                await client.send_message(user_data.id, answer)
+                logging.info("Message was sent.")
     except ValueError as val_err:
         logging.error(val_err)
     except TypeError as type_err:
