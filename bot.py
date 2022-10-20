@@ -14,14 +14,6 @@ CLIENT = TelegramClient(SESSION, API_ID, API_HASH)
 
 IGNORED_FILE = "user_list.txt"
 
-answer = """
-Hello. This is an auto-generated answer just for you. \n
-You have been pseudorandomly selected to test a new bot. \n
-Congratulations, it's absolutely free ! \n
-Soon I will come to you, but it's not certain. \n
-GL HF
-"""
-
 
 # Logging
 logging.basicConfig(
@@ -59,25 +51,39 @@ async def show_selected_users():
 
 @CLIENT.on(events.NewMessage)
 async def handle_new_message(event):
-    try:
-        user_data = await event.client.get_entity(event.from_id)
-        logging.info(f"Raw sender data: {user_data}")
+    await show_selected_users()
 
+    user_data = await event.client.get_entity(event.from_id)
+    logging.info(f"Raw sender data: {user_data}")
+    try:
         if user_data.id in USERS_ID:
             logging.info(
-                f"User with name {user_data.first_name} - with ID: {user_data.id} - send message: {event.message}"
+                f"User with name {user_data.first_name} - "
+                f"with ID: {user_data.id} - "
+                f"send message: {event.message.message}"
             )
-            logging.info(event.message.message)
             logging.info("Waiting for answer...")
             await asyncio.sleep(random.randrange(3, 15))
             async with CLIENT.action(user_data.id, "typing"):
                 await asyncio.sleep(random.randrange(2, 5))
-                await CLIENT.send_message(user_data.id, answer)
+                await CLIENT.send_message(
+                    user_data.id,
+                    f"""
+Hello, {user_data.first_name}. \n
+This is an auto-generated answer just for you. \n
+You have been pseudorandomly selected to test a new bot. \n
+**Congratulations, it's absolutely free !** \n
+Soon I will come to you, but it's not certain. \n
+GL HF
+""",
+                )
                 logging.info("Answer was sent.")
     except ValueError as val_err:
+        logging.error(f"Sender is {user_data.first_name}")
         logging.error(val_err)
     except TypeError as type_err:
         logging.error("That maybe sticker was sent, not text.")
+        logging.error(f"Sender is {user_data.first_name}")
         logging.error(type_err)
 
 
