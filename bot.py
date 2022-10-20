@@ -10,7 +10,7 @@ API_ID = os.environ["API_ID"]
 API_HASH = os.environ["API_HASH"]
 SESSION = os.environ["SESSION"]
 
-client = TelegramClient(SESSION, API_ID, API_HASH)
+CLIENT = TelegramClient(SESSION, API_ID, API_HASH)
 
 IGNORED_FILE = "user_list.txt"
 
@@ -48,28 +48,32 @@ def load_user_ids_from_file() -> List[int]:
         logging.error(file_not_found_err)
 
 
-@client.on(events.NewMessage)
+USERS_ID = load_user_ids_from_file()
+
+
+async def show_selected_users():
+    async for dialog in CLIENT.iter_dialogs():
+        if dialog.id in USERS_ID:
+            logging.info(f"Selected username: {dialog.name}; ID: {dialog.id}")
+
+
+@CLIENT.on(events.NewMessage)
 async def handle_new_message(event):
-    user_ids = load_user_ids_from_file()
-    logging.info(f"Users id uploaded: {user_ids}")
     try:
         user_data = await event.client.get_entity(event.from_id)
-        # Show usernames by id
-        logging.info(user_data)
-        # logging.info(user_data.first_name)
-        # print(type(from_user.id))
+        logging.info(f"Raw sender data: {user_data}")
 
-        if user_data.id in user_ids:
+        if user_data.id in USERS_ID:
             logging.info(
                 f"User with name {user_data.first_name} - with ID: {user_data.id} - send message: {event.message}"
             )
             logging.info(event.message.message)
             logging.info("Waiting for answer...")
             await asyncio.sleep(random.randrange(3, 15))
-            async with client.action(user_data.id, "typing"):
+            async with CLIENT.action(user_data.id, "typing"):
                 await asyncio.sleep(random.randrange(2, 5))
-                await client.send_message(user_data.id, answer)
-                logging.info("Message was sent.")
+                await CLIENT.send_message(user_data.id, answer)
+                logging.info("Answer was sent.")
     except ValueError as val_err:
         logging.error(val_err)
     except TypeError as type_err:
@@ -78,5 +82,5 @@ async def handle_new_message(event):
 
 
 if __name__ == "__main__":
-    client.start()
-    client.run_until_disconnected()
+    CLIENT.start()
+    CLIENT.run_until_disconnected()
