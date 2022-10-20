@@ -10,17 +10,9 @@ API_ID = os.environ["API_ID"]
 API_HASH = os.environ["API_HASH"]
 SESSION = os.environ["SESSION"]
 
-client = TelegramClient(SESSION, API_ID, API_HASH)
+CLIENT = TelegramClient(SESSION, API_ID, API_HASH)
 
 IGNORED_FILE = "user_list.txt"
-
-answer = """
-Hello. This is an auto-generated answer just for you. \n
-You have been pseudorandomly selected to test a new bot. \n
-Congratulations, it's absolutely free ! \n
-Soon I will come to you, but it's not certain. \n
-GL HF
-"""
 
 
 # Logging
@@ -48,35 +40,53 @@ def load_user_ids_from_file() -> List[int]:
         logging.error(file_not_found_err)
 
 
-@client.on(events.NewMessage)
-async def handle_new_message(event):
-    user_ids = load_user_ids_from_file()
-    logging.info(f"Users id uploaded: {user_ids}")
-    try:
-        user_data = await event.client.get_entity(event.from_id)
-        # Show usernames by id
-        logging.info(user_data)
-        # logging.info(user_data.first_name)
-        # print(type(from_user.id))
+USERS_ID = load_user_ids_from_file()
 
-        if user_data.id in user_ids:
+
+async def show_selected_users():
+    async for dialog in CLIENT.iter_dialogs():
+        if dialog.id in USERS_ID:
+            logging.info(f"Selected username: {dialog.name}; ID: {dialog.id}")
+
+
+@CLIENT.on(events.NewMessage)
+async def handle_new_message(event):
+    await show_selected_users()
+
+    user_data = await event.client.get_entity(event.from_id)
+    logging.info(f"Raw sender data: {user_data}")
+    try:
+        if user_data.id in USERS_ID:
             logging.info(
-                f"User with name {user_data.first_name} - with ID: {user_data.id} - send message: {event.message}"
+                f"User with name {user_data.first_name} - "
+                f"with ID: {user_data.id} - "
+                f"send message: {event.message.message}"
             )
-            logging.info(event.message.message)
             logging.info("Waiting for answer...")
             await asyncio.sleep(random.randrange(3, 15))
-            async with client.action(user_data.id, "typing"):
+            async with CLIENT.action(user_data.id, "typing"):
                 await asyncio.sleep(random.randrange(2, 5))
-                await client.send_message(user_data.id, answer)
-                logging.info("Message was sent.")
+                await CLIENT.send_message(
+                    user_data.id,
+                    f"""
+Hello, {user_data.first_name}. \n
+This is an auto-generated answer just for you. \n
+You have been pseudorandomly selected to test a new bot. \n
+**Congratulations, it's absolutely free !** \n
+Soon I will come to you, but it's not certain. \n
+GL HF
+""",
+                )
+                logging.info("Answer was sent.")
     except ValueError as val_err:
+        logging.error(f"Sender is {user_data.first_name}")
         logging.error(val_err)
     except TypeError as type_err:
         logging.error("That maybe sticker was sent, not text.")
+        logging.error(f"Sender is {user_data.first_name}")
         logging.error(type_err)
 
 
 if __name__ == "__main__":
-    client.start()
-    client.run_until_disconnected()
+    CLIENT.start()
+    CLIENT.run_until_disconnected()
