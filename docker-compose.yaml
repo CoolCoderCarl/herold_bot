@@ -6,5 +6,12 @@ services:
     image: h0d0user/herold_bot:latest
     restart: always
     network_mode: host
-#    environment:
-#      - API_TOKEN=YOURTOKEN
+    environment:
+      - API_ID=YOURAPIID
+      - API_HASH=YOURAPIHASH
+      - SESSION=YOURSESSION
+    volumes:
+      - /opt/:/root/herold_bot/user_list.txt
+      - /opt/:/root/herold_bot/JustTalk.session
+volumes:
+  herold_bot:
