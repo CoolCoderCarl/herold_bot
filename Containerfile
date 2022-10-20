@@ -8,4 +8,4 @@ RUN apk add screen
 
 FROM builder
 
-CMD ["sleep", "15800000"]
+CMD ["python3", "/opt/bot.py"]
