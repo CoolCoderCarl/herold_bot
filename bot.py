@@ -42,7 +42,7 @@ def load_ids_from_files(file: Path) -> List[int]:
     try:
         with open(file, "r") as users_ids_file:
             result = [int(u_ids) for u_ids in users_ids_file.read().split()]
-            logging.info("Uploaded ids from the file done successfully.")
+            logging.info(f"Uploaded ids from the {users_ids_file.name} done successfully.")
             return result
     except FileNotFoundError as file_not_found_err:
         logging.error(file_not_found_err)
@@ -61,7 +61,7 @@ def load_responses_from_files(file: Path) -> str:
     try:
         with open(file, "r") as response_file:
             result = response_file.read()
-            logging.info("Uploaded response from the file done successfully.")
+            logging.info(f"Uploaded response from the {response_file.name} done successfully.")
             return result
     except FileNotFoundError as file_not_found_err:
         logging.error(file_not_found_err)
