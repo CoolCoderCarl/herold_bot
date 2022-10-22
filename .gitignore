@@ -128,8 +128,9 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# List of user ids
-user_list.txt
+# List of user ids & answers
+*_list.txt
+*_response.txt
 
 # Session journals
 *.session*
