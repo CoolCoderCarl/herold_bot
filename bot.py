@@ -80,7 +80,7 @@ async def show_selected_users():
             logging.info(f"Selected familiar username: {dialog.name}; ID: {dialog.id}")
 
 
-def send_message_template(user_data, event, start_range, end_range, response_type):
+async def send_message_template(user_data, event, start_range, end_range, response_type):
     logging.info(
         f"Contact: {user_data.contact} -"
         f"username: {user_data.first_name} - "
