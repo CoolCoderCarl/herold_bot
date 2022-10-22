@@ -17,11 +17,11 @@ CLIENT = TelegramClient(SESSION, API_ID, API_HASH)
 
 # Users files
 FRIENDS_IDS_FILE = Path("friends_ids_list.txt")
-BANISHED_IDS_FILE = Path("banished_ids_list.txt")
+FAMILIAR_IDS_FILE = Path("familiar_ids_list.txt")
 
 # Response files
 FRIENDS_RESPONSE_FILE = Path("friend_response.txt")
-BANISHED_RESPONSE_FILE = Path("banished_response.txt")
+FAMILIAR_RESPONSE_FILE = Path("familiar_response.txt")
 HR_RESPONSE_FILE = Path("hr_response.txt")
 
 # Logging
@@ -54,10 +54,10 @@ def load_ids_from_files(file: Path) -> List[int]:
 
 
 FRIENDS_IDS = load_ids_from_files(FRIENDS_IDS_FILE)
-BANISHED_IDS = load_ids_from_files(BANISHED_IDS_FILE)
+FAMILIAR_IDS = load_ids_from_files(FAMILIAR_IDS_FILE)
 
 
-def load_text_from_files(file: Path) -> str:
+def load_responses_from_files(file: Path) -> str:
     """
     Load responses from the files
     Try to load from file, if exception caught, send message about err
@@ -73,17 +73,17 @@ def load_text_from_files(file: Path) -> str:
         logging.error(file_not_found_err)
 
 
-FRIEND_RESPONSE = load_text_from_files(FRIENDS_RESPONSE_FILE)
-BANISHED_RESPONSE = load_text_from_files(BANISHED_RESPONSE_FILE)
-HR_RESPONSE = load_text_from_files(HR_RESPONSE_FILE)
+FRIEND_RESPONSE = load_responses_from_files(FRIENDS_RESPONSE_FILE)
+FAMILIAR_RESPONSE = load_responses_from_files(FAMILIAR_RESPONSE_FILE)
+HR_RESPONSE = load_responses_from_files(HR_RESPONSE_FILE)
 
 
 async def show_selected_users():
     async for dialog in CLIENT.iter_dialogs():
         if dialog.id in FRIENDS_IDS:
             logging.info(f"Selected friends username: {dialog.name}; ID: {dialog.id}")
-        elif dialog.id in BANISHED_IDS:
-            logging.info(f"Selected banished username: {dialog.name}; ID: {dialog.id}")
+        elif dialog.id in FAMILIAR_IDS:
+            logging.info(f"Selected familiar username: {dialog.name}; ID: {dialog.id}")
 
 
 @CLIENT.on(events.NewMessage)
@@ -100,7 +100,7 @@ async def handle_new_message(event):
                 f"has ID: {user_data.id} - "
                 f"sent message: {event.message.message}"
             )
-            await CLIENT.send_message(user_data.id, HR_RESPONSE)
+            # await CLIENT.send_message(user_data.id, HR_RESPONSE)
         elif user_data.id in FRIENDS_IDS:
             logging.info(
                 f"Username: {user_data.first_name} - "
@@ -116,7 +116,7 @@ async def handle_new_message(event):
                     user_data.id,
                     f"""
 Hello, {user_data.first_name}. \n
-This is an automatically sent response. \n
+**This message was sent automatically.** \n
 """,
                 )
                 await CLIENT.send_message(user_data.id, FRIEND_RESPONSE)
