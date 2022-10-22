@@ -11,7 +11,6 @@ from telethon import TelegramClient, events
 API_ID = os.environ["API_ID"]
 API_HASH = os.environ["API_HASH"]
 SESSION = os.environ["SESSION"]
-DEBUG_ENABLED = os.environ["DEBUG_ENABLED"]
 
 CLIENT = TelegramClient(SESSION, API_ID, API_HASH)
 
@@ -25,9 +24,6 @@ FAMILIAR_RESPONSE_FILE = Path("familiar_response.txt")
 HR_RESPONSE_FILE = Path("hr_response.txt")
 
 # Logging
-logging.basicConfig(
-    format="%(asctime)s - %(levelname)s - %(message)s", level=logging.DEBUG
-)
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO
 )
@@ -46,8 +42,7 @@ def load_ids_from_files(file: Path) -> List[int]:
     try:
         with open(file, "r") as users_ids_file:
             result = [int(u_ids) for u_ids in users_ids_file.read().split()]
-            if DEBUG_ENABLED:
-                logging.debug("Uploaded ids from the file done successfully.")
+            logging.info("Uploaded ids from the file done successfully.")
             return result
     except FileNotFoundError as file_not_found_err:
         logging.error(file_not_found_err)
@@ -66,8 +61,7 @@ def load_responses_from_files(file: Path) -> str:
     try:
         with open(file, "r") as response_file:
             result = response_file.read()
-            if DEBUG_ENABLED:
-                logging.debug("Uploaded response from the file done successfully.")
+            logging.info("Uploaded response from the file done successfully.")
             return result
     except FileNotFoundError as file_not_found_err:
         logging.error(file_not_found_err)
@@ -86,42 +80,43 @@ async def show_selected_users():
             logging.info(f"Selected familiar username: {dialog.name}; ID: {dialog.id}")
 
 
+def send_message_template(user_data, event, start_range, end_range, response_type):
+    logging.info(
+        f"Contact: {user_data.contact} -"
+        f"username: {user_data.first_name} - "
+        f"ID: {user_data.id} - "
+        f"sent message: {event.message.message}"
+    )
+    logging.info("Waiting for response...")
+    async with CLIENT.action(user_data.id, "typing"):
+        await asyncio.sleep(random.randrange(start_range, end_range))
+        await CLIENT.send_message(
+            user_data.id,
+            f"""
+            Hello, {user_data.first_name}. \n
+            **This message was sent automatically.** \n
+            """,
+        )
+        await CLIENT.send_message(user_data.id, response_type)
+        logging.info(f"Response was sent to {user_data.first_name}.")
+
+
 @CLIENT.on(events.NewMessage)
-async def handle_new_message(event):
+async def response_to_group(event):
     await show_selected_users()
 
     user_data = await event.client.get_entity(event.from_id)
+
     logging.info(f"Raw sender data: {user_data}")
+
     try:
         if not user_data.contact:
-            logging.info(
-                f"Contact: {user_data.contact} -"
-                f"username: {user_data.first_name} - "
-                f"has ID: {user_data.id} - "
-                f"sent message: {event.message.message}"
-            )
-            # await CLIENT.send_message(user_data.id, HR_RESPONSE)
+            # send_message_template(user_data, event, 1, 5, HR_RESPONSE)
+            pass
         elif user_data.id in FRIENDS_IDS:
-            logging.info(
-                f"Username: {user_data.first_name} - "
-                f"has ID: {user_data.id} - "
-                f"sent message: {event.message.message}"
-            )
-            if DEBUG_ENABLED:
-                logging.debug("Waiting for response...")
-            await asyncio.sleep(random.randrange(3, 15))
-            async with CLIENT.action(user_data.id, "typing"):
-                await asyncio.sleep(random.randrange(2, 5))
-                await CLIENT.send_message(
-                    user_data.id,
-                    f"""
-Hello, {user_data.first_name}. \n
-**This message was sent automatically.** \n
-""",
-                )
-                await CLIENT.send_message(user_data.id, FRIEND_RESPONSE)
-                if DEBUG_ENABLED:
-                    logging.debug(f"Response was sent to {user_data.first_name}.")
+            send_message_template(user_data, event, 5, 10, FRIEND_RESPONSE)
+        elif user_data.id in FAMILIAR_IDS:
+            send_message_template(user_data, event, 15, 20, FAMILIAR_RESPONSE)
     except ValueError as val_err:
         logging.error(f"Sender is {user_data.first_name}")
         logging.error(val_err)
