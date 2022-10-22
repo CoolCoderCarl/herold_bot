@@ -114,9 +114,9 @@ async def response_to_group(event):
             # send_message_template(user_data, event, 1, 5, HR_RESPONSE)
             pass
         elif user_data.id in FRIENDS_IDS:
-            send_message_template(user_data, event, 5, 10, FRIEND_RESPONSE)
+            await send_message_template(user_data, event, 5, 10, FRIEND_RESPONSE)
         elif user_data.id in FAMILIAR_IDS:
-            send_message_template(user_data, event, 15, 20, FAMILIAR_RESPONSE)
+            await send_message_template(user_data, event, 15, 20, FAMILIAR_RESPONSE)
     except ValueError as val_err:
         logging.error(f"Sender is {user_data.first_name}")
         logging.error(val_err)
