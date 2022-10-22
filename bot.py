@@ -42,7 +42,9 @@ def load_ids_from_files(file: Path) -> List[int]:
     try:
         with open(file, "r") as users_ids_file:
             result = [int(u_ids) for u_ids in users_ids_file.read().split()]
-            logging.info(f"Uploaded ids from the {users_ids_file.name} done successfully.")
+            logging.info(
+                f"Uploaded ids from the {users_ids_file.name} done successfully."
+            )
             return result
     except FileNotFoundError as file_not_found_err:
         logging.error(file_not_found_err)
@@ -61,7 +63,9 @@ def load_responses_from_files(file: Path) -> str:
     try:
         with open(file, "r") as response_file:
             result = response_file.read()
-            logging.info(f"Uploaded response from the {response_file.name} done successfully.")
+            logging.info(
+                f"Uploaded response from the {response_file.name} done successfully."
+            )
             return result
     except FileNotFoundError as file_not_found_err:
         logging.error(file_not_found_err)
@@ -80,7 +84,9 @@ async def show_selected_users():
             logging.info(f"Selected familiar username: {dialog.name}; ID: {dialog.id}")
 
 
-async def send_message_template(user_data, event, start_range, end_range, response_type):
+async def send_message_template(
+    user_data, event, start_range, end_range, response_type
+):
     logging.info(
         f"Contact: {user_data.contact} -"
         f"username: {user_data.first_name} - "
@@ -93,9 +99,9 @@ async def send_message_template(user_data, event, start_range, end_range, respon
         await CLIENT.send_message(
             user_data.id,
             f"""
-            Hello, {user_data.first_name}. \n
-            **This message was sent automatically.** \n
-            """,
+Hello, {user_data.first_name}. \n
+**This message was sent automatically.** \n
+""",
         )
         await CLIENT.send_message(user_data.id, response_type)
         logging.info(f"Response was sent to {user_data.first_name}.")
