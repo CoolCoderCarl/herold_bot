@@ -10,8 +10,12 @@ services:
       - API_ID=YOURAPIID
       - API_HASH=YOURAPIHASH
       - SESSION=YOURSESSION
+      - DEBUG_ENABLED=True
     volumes:
-      - /opt/:/root/herold_bot/user_list.txt
+      - /opt/:/root/herold_bot/friends_ids_list.txt
+      - /opt/:/root/herold_bot/banished_ids_list.txt
+      - /opt/:/root/herold_bot/friend_response.txt
+      - /opt/:/root/herold_bot/banished_response.txt
       - /opt/:/root/herold_bot/JustTalk.session
 volumes:
   herold_bot:

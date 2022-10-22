@@ -2,20 +2,32 @@ import asyncio
 import logging
 import os
 import random
+from pathlib import Path
 from typing import List
 
 from telethon import TelegramClient, events
 
+# Environment variables
 API_ID = os.environ["API_ID"]
 API_HASH = os.environ["API_HASH"]
 SESSION = os.environ["SESSION"]
+DEBUG_ENABLED = os.environ["DEBUG_ENABLED"]
 
 CLIENT = TelegramClient(SESSION, API_ID, API_HASH)
 
-IGNORED_FILE = "user_list.txt"
+# Users files
+FRIENDS_IDS_FILE = Path("friends_ids_list.txt")
+BANISHED_IDS_FILE = Path("banished_ids_list.txt")
 
+# Response files
+FRIENDS_RESPONSE_FILE = Path("friend_response.txt")
+BANISHED_RESPONSE_FILE = Path("banished_response.txt")
+HR_RESPONSE_FILE = Path("hr_response.txt")
 
 # Logging
+logging.basicConfig(
+    format="%(asctime)s - %(levelname)s - %(message)s", level=logging.DEBUG
+)
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO
 )
@@ -24,29 +36,54 @@ logging.basicConfig(
 )
 
 
-def load_user_ids_from_file() -> List[int]:
+def load_ids_from_files(file: Path) -> List[int]:
     """
-    Load user ids from file
+    Load user ids from the files
     Try to load from file, if exception caught, send message about err
-    Also convert to int to compare with id from Telegram
+    Also convert to int to compare with ids from Telegram
     :return:
     """
     try:
-        with open(IGNORED_FILE, "r") as users_ids_file:
-            user_ids = [int(u_ids) for u_ids in users_ids_file.read().split()]
-            logging.info("Uploaded from the file done successfully.")
-            return user_ids
+        with open(file, "r") as users_ids_file:
+            result = [int(u_ids) for u_ids in users_ids_file.read().split()]
+            if DEBUG_ENABLED:
+                logging.debug("Uploaded ids from the file done successfully.")
+            return result
     except FileNotFoundError as file_not_found_err:
         logging.error(file_not_found_err)
 
 
-USERS_ID = load_user_ids_from_file()
+FRIENDS_IDS = load_ids_from_files(FRIENDS_IDS_FILE)
+BANISHED_IDS = load_ids_from_files(BANISHED_IDS_FILE)
+
+
+def load_text_from_files(file: Path) -> str:
+    """
+    Load responses from the files
+    Try to load from file, if exception caught, send message about err
+    :return:
+    """
+    try:
+        with open(file, "r") as response_file:
+            result = response_file.read()
+            if DEBUG_ENABLED:
+                logging.debug("Uploaded response from the file done successfully.")
+            return result
+    except FileNotFoundError as file_not_found_err:
+        logging.error(file_not_found_err)
+
+
+FRIEND_RESPONSE = load_text_from_files(FRIENDS_RESPONSE_FILE)
+BANISHED_RESPONSE = load_text_from_files(BANISHED_RESPONSE_FILE)
+HR_RESPONSE = load_text_from_files(HR_RESPONSE_FILE)
 
 
 async def show_selected_users():
     async for dialog in CLIENT.iter_dialogs():
-        if dialog.id in USERS_ID:
-            logging.info(f"Selected username: {dialog.name}; ID: {dialog.id}")
+        if dialog.id in FRIENDS_IDS:
+            logging.info(f"Selected friends username: {dialog.name}; ID: {dialog.id}")
+        elif dialog.id in BANISHED_IDS:
+            logging.info(f"Selected banished username: {dialog.name}; ID: {dialog.id}")
 
 
 @CLIENT.on(events.NewMessage)
@@ -56,13 +93,22 @@ async def handle_new_message(event):
     user_data = await event.client.get_entity(event.from_id)
     logging.info(f"Raw sender data: {user_data}")
     try:
-        if user_data.id in USERS_ID:
+        if not user_data.contact:
             logging.info(
-                f"User with name {user_data.first_name} - "
-                f"with ID: {user_data.id} - "
-                f"send message: {event.message.message}"
+                f"Contact: {user_data.contact} -"
+                f"username: {user_data.first_name} - "
+                f"has ID: {user_data.id} - "
+                f"sent message: {event.message.message}"
             )
-            logging.info("Waiting for answer...")
+            await CLIENT.send_message(user_data.id, HR_RESPONSE)
+        elif user_data.id in FRIENDS_IDS:
+            logging.info(
+                f"Username: {user_data.first_name} - "
+                f"has ID: {user_data.id} - "
+                f"sent message: {event.message.message}"
+            )
+            if DEBUG_ENABLED:
+                logging.debug("Waiting for response...")
             await asyncio.sleep(random.randrange(3, 15))
             async with CLIENT.action(user_data.id, "typing"):
                 await asyncio.sleep(random.randrange(2, 5))
@@ -70,14 +116,12 @@ async def handle_new_message(event):
                     user_data.id,
                     f"""
 Hello, {user_data.first_name}. \n
-This is an auto-generated answer just for you. \n
-You have been pseudorandomly selected to test a new bot. \n
-**Congratulations, it's absolutely free !** \n
-Soon I will come to you, but it's not certain. \n
-GL HF
+This is an automatically sent response. \n
 """,
                 )
-                logging.info("Answer was sent.")
+                await CLIENT.send_message(user_data.id, FRIEND_RESPONSE)
+                if DEBUG_ENABLED:
+                    logging.debug(f"Response was sent to {user_data.first_name}.")
     except ValueError as val_err:
         logging.error(f"Sender is {user_data.first_name}")
         logging.error(val_err)
