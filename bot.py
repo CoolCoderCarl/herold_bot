@@ -1,4 +1,5 @@
 import asyncio
+import codecs
 import logging
 import os
 import random
@@ -22,6 +23,9 @@ FAMILIAR_IDS_FILE = Path("familiar_ids_list.txt")
 FRIENDS_RESPONSE_FILE = Path("friend_response.txt")
 FAMILIAR_RESPONSE_FILE = Path("familiar_response.txt")
 HR_RESPONSE_FILE = Path("hr_response.txt")
+
+# Key words file
+HR_KEY_WORDS_FILE = Path("hr_key_words_list.txt")
 
 # Logging
 logging.basicConfig(
@@ -61,7 +65,7 @@ def load_responses_from_files(file: Path) -> str:
     :return:
     """
     try:
-        with open(file, "r") as response_file:
+        with codecs.open(file, "r", "utf-8") as response_file:
             result = response_file.read()
             logging.info(
                 f"Uploaded response from the {response_file.name} done successfully."
@@ -74,6 +78,8 @@ def load_responses_from_files(file: Path) -> str:
 FRIEND_RESPONSE = load_responses_from_files(FRIENDS_RESPONSE_FILE)
 FAMILIAR_RESPONSE = load_responses_from_files(FAMILIAR_RESPONSE_FILE)
 HR_RESPONSE = load_responses_from_files(HR_RESPONSE_FILE)
+
+HR_KEY_WORDS = load_responses_from_files(HR_KEY_WORDS_FILE)
 
 
 async def show_selected_users():
@@ -116,13 +122,15 @@ async def response_to_group(event):
     logging.info(f"Raw sender data: {user_data}")
 
     try:
-        if not user_data.contact:
-            # send_message_template(user_data, event, 1, 5, HR_RESPONSE)
-            pass
-        elif user_data.id in FRIENDS_IDS:
+        if user_data.id in FRIENDS_IDS:
             await send_message_template(user_data, event, 5, 10, FRIEND_RESPONSE)
         elif user_data.id in FAMILIAR_IDS:
             await send_message_template(user_data, event, 15, 20, FAMILIAR_RESPONSE)
+        elif not user_data.contact:
+            for key_words in HR_KEY_WORDS:
+                if key_words in event.message.message:
+                    logging.info("Looks like HR is on the line.")
+                    await send_message_template(user_data, event, 1, 5, HR_RESPONSE)
     except ValueError as val_err:
         logging.error(f"Sender is {user_data.first_name}")
         logging.error(val_err)
