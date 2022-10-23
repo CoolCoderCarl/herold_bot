@@ -11,7 +11,12 @@ services:
       - API_HASH=YOURAPIHASH
       - SESSION=YOURSESSION
     volumes:
-      - /opt/:/root/herold_bot/user_list.txt
-      - /opt/:/root/herold_bot/JustTalk.session
+      - "/root/herold_bot/friends_ids_list.txt:/friends_ids_list.txt"
+      - "/root/herold_bot/friend_response.txt:/friend_response.txt"
+      - "/root/herold_bot/familiar_ids_list.txt:/familiar_ids_list.txt"
+      - "/root/herold_bot/familiar_response.txt:/familiar_response.txt"
+      - "/root/herold_bot/hr_response.txt:/hr_response.txt"
+      - "/root/herold_bot/hr_key_words.txt:/hr_key_words.txt"
+      - "/root/herold_bot/JustTalk.session:/JustTalk.session"
 volumes:
   herold_bot:
