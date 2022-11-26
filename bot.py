@@ -121,7 +121,7 @@ async def response_to_group(event):
         if user_data.id in FRIENDS_IDS:
             await send_message_template(user_data, event, 5, 10, FRIEND_RESPONSE)
         elif not user_data.contact:
-            if HR_KEY_WORDS.lower() in event.message.message:
+            if HR_KEY_WORDS in str(event.message.message).lower():
                 logging.info("Looks like HR is on the line.")
                 await send_message_template(user_data, event, 1, 5, HR_RESPONSE)
             else:
