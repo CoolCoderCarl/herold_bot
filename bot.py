@@ -15,15 +15,12 @@ SESSION = os.environ["SESSION"]
 
 CLIENT = TelegramClient(SESSION, API_ID, API_HASH)
 
-# Users files
-FRIENDS_IDS_FILE = Path("friends_ids_list.txt")
+# Users ID file
+CIRCULATION_IDS_FILE = Path("circulation_ids_list.txt")
 
-# Response files
-FRIENDS_RESPONSE_FILE = Path("friend_response.txt")
-HR_RESPONSE_FILE = Path("hr_response.txt")
+# Response
+CIRCULATION_RESPONSE_FILE = Path("circulation_response.txt")
 
-# Key words file
-HR_KEY_WORDS_FILE = Path("hr_key_words_list.txt")
 
 # Logging
 logging.basicConfig(
@@ -52,7 +49,7 @@ def load_ids_from_files(file: Path) -> List[int]:
         logging.error(file_not_found_err)
 
 
-FRIENDS_IDS = load_ids_from_files(FRIENDS_IDS_FILE)
+CIRCULATION_IDS = load_ids_from_files(CIRCULATION_IDS_FILE)
 
 
 def load_responses_from_files(file: Path) -> str:
@@ -72,16 +69,13 @@ def load_responses_from_files(file: Path) -> str:
         logging.error(file_not_found_err)
 
 
-FRIEND_RESPONSE = load_responses_from_files(FRIENDS_RESPONSE_FILE)
-HR_RESPONSE = load_responses_from_files(HR_RESPONSE_FILE)
-
-HR_KEY_WORDS = load_responses_from_files(HR_KEY_WORDS_FILE)
+CIRCULATION_RESPONSE = load_responses_from_files(CIRCULATION_RESPONSE_FILE)
 
 
 async def show_selected_users():
     async for dialog in CLIENT.iter_dialogs():
-        if dialog.id in FRIENDS_IDS:
-            logging.info(f"Selected friends username: {dialog.name}; ID: {dialog.id}")
+        if dialog.id in CIRCULATION_IDS:
+            logging.info(f"Selected username: {dialog.name}; ID: {dialog.id}")
 
 
 async def send_message_template(
@@ -89,7 +83,7 @@ async def send_message_template(
 ):
     logging.info(
         f"Contact: {user_data.contact} - "
-        f"username: {user_data.first_name} - "
+        f"first name: {user_data.first_name} - "
         f"ID: {user_data.id} - "
         f"sent message: {event.message.message}"
     )
@@ -118,20 +112,16 @@ async def response_to_group(event):
     logging.info(f"Raw sender data: {user_data}")
 
     try:
-        if user_data.id in FRIENDS_IDS:
-            await send_message_template(user_data, event, 5, 10, FRIEND_RESPONSE)
+        if user_data.id in CIRCULATION_IDS:
+            await send_message_template(user_data, event, 5, 10, CIRCULATION_RESPONSE)
         elif not user_data.contact:
-            if HR_KEY_WORDS in str(event.message.message).lower():
-                logging.info("Looks like HR is on the line.")
-                await send_message_template(user_data, event, 1, 5, HR_RESPONSE)
-            else:
-                logging.info("Looks like someone unfamiliar is on the line.")
-                logging.info(
-                    f"Contact: {user_data.contact} - "
-                    f"username: {user_data.first_name} - "
-                    f"ID: {user_data.id} - "
-                    f"sent message: {event.message.message}"
-                )
+            logging.info("Looks like someone unfamiliar is on the line.")
+            logging.info(
+                f"Contact: {user_data.contact} - "
+                f"first name: {user_data.first_name} - "
+                f"ID: {user_data.id} - "
+                f"sent message: {event.message.message}"
+            )
     except ValueError as val_err:
         logging.error(f"Sender is {user_data.first_name}.")
         logging.error(val_err)
