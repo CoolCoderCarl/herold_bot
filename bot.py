@@ -17,11 +17,9 @@ CLIENT = TelegramClient(SESSION, API_ID, API_HASH)
 
 # Users files
 FRIENDS_IDS_FILE = Path("friends_ids_list.txt")
-FAMILIAR_IDS_FILE = Path("familiar_ids_list.txt")
 
 # Response files
 FRIENDS_RESPONSE_FILE = Path("friend_response.txt")
-FAMILIAR_RESPONSE_FILE = Path("familiar_response.txt")
 HR_RESPONSE_FILE = Path("hr_response.txt")
 
 # Key words file
@@ -55,7 +53,6 @@ def load_ids_from_files(file: Path) -> List[int]:
 
 
 FRIENDS_IDS = load_ids_from_files(FRIENDS_IDS_FILE)
-FAMILIAR_IDS = load_ids_from_files(FAMILIAR_IDS_FILE)
 
 
 def load_responses_from_files(file: Path) -> str:
@@ -76,7 +73,6 @@ def load_responses_from_files(file: Path) -> str:
 
 
 FRIEND_RESPONSE = load_responses_from_files(FRIENDS_RESPONSE_FILE)
-FAMILIAR_RESPONSE = load_responses_from_files(FAMILIAR_RESPONSE_FILE)
 HR_RESPONSE = load_responses_from_files(HR_RESPONSE_FILE)
 
 HR_KEY_WORDS = load_responses_from_files(HR_KEY_WORDS_FILE)
@@ -86,31 +82,31 @@ async def show_selected_users():
     async for dialog in CLIENT.iter_dialogs():
         if dialog.id in FRIENDS_IDS:
             logging.info(f"Selected friends username: {dialog.name}; ID: {dialog.id}")
-        elif dialog.id in FAMILIAR_IDS:
-            logging.info(f"Selected familiar username: {dialog.name}; ID: {dialog.id}")
 
 
 async def send_message_template(
     user_data, event, start_range, end_range, response_type
 ):
     logging.info(
-        f"Contact: {user_data.contact} -"
+        f"Contact: {user_data.contact} - "
         f"username: {user_data.first_name} - "
         f"ID: {user_data.id} - "
         f"sent message: {event.message.message}"
     )
-    logging.info("Waiting for response...")
-    async with CLIENT.action(user_data.id, "typing"):
-        await asyncio.sleep(random.randrange(start_range, end_range))
-        await CLIENT.send_message(
-            user_data.id,
-            f"""
-Hello, {user_data.first_name}. \n
-**This message was sent automatically.** \n
-""",
-        )
-        await CLIENT.send_message(user_data.id, response_type)
-        logging.info(f"Response was sent to {user_data.first_name}.")
+
+
+#     logging.info("Waiting for response...")
+#     async with CLIENT.action(user_data.id, "typing"):
+#         await asyncio.sleep(random.randrange(start_range, end_range))
+#         await CLIENT.send_message(
+#             user_data.id,
+#             f"""
+# Hello, {user_data.first_name}. \n
+# **This message was sent automatically.** \n
+# """,
+#         )
+#         await CLIENT.send_message(user_data.id, response_type)
+#         logging.info(f"Response was sent to {user_data.first_name}.")
 
 
 @CLIENT.on(events.NewMessage)
@@ -124,20 +120,28 @@ async def response_to_group(event):
     try:
         if user_data.id in FRIENDS_IDS:
             await send_message_template(user_data, event, 5, 10, FRIEND_RESPONSE)
-        elif user_data.id in FAMILIAR_IDS:
-            await send_message_template(user_data, event, 15, 20, FAMILIAR_RESPONSE)
         elif not user_data.contact:
-            for key_words in HR_KEY_WORDS:
-                if key_words in event.message.message:
-                    logging.info("Looks like HR is on the line.")
-                    await send_message_template(user_data, event, 1, 5, HR_RESPONSE)
+            if HR_KEY_WORDS in str(event.message.message).lower():
+                logging.info("Looks like HR is on the line.")
+                await send_message_template(user_data, event, 1, 5, HR_RESPONSE)
+            else:
+                logging.info("Looks like someone unfamiliar is on the line.")
+                logging.info(
+                    f"Contact: {user_data.contact} - "
+                    f"username: {user_data.first_name} - "
+                    f"ID: {user_data.id} - "
+                    f"sent message: {event.message.message}"
+                )
     except ValueError as val_err:
-        logging.error(f"Sender is {user_data.first_name}")
+        logging.error(f"Sender is {user_data.first_name}.")
         logging.error(val_err)
     except TypeError as type_err:
         logging.error("That maybe sticker was sent, not text.")
-        logging.error(f"Sender is {user_data.first_name}")
+        logging.error(f"Sender is {user_data.first_name}.")
         logging.error(type_err)
+    except BaseException as base_exception:
+        logging.error(f"Sender is {user_data.first_name}.")
+        logging.error(base_exception)
 
 
 if __name__ == "__main__":
