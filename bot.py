@@ -59,7 +59,7 @@ def load_responses_from_files(file: Path) -> str:
     :return:
     """
     try:
-        with codecs.open(str(file), "r", "utf-8") as response_file:
+        with open(file, "r") as response_file:
             result = response_file.read()
             logging.info(
                 f"Uploaded response from the {response_file.name} done successfully."
