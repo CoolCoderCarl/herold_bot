@@ -1,5 +1,5 @@
 import asyncio
-import codecs
+# import codecs
 import logging
 import os
 import random
@@ -88,19 +88,18 @@ async def send_message_template(
         f"sent message: {event.message.message}"
     )
 
-
-#     logging.info("Waiting for response...")
-#     async with CLIENT.action(user_data.id, "typing"):
-#         await asyncio.sleep(random.randrange(start_range, end_range))
-#         await CLIENT.send_message(
-#             user_data.id,
-#             f"""
-# Hello, {user_data.first_name}. \n
-# **This message was sent automatically.** \n
-# """,
-#         )
-#         await CLIENT.send_message(user_data.id, response_type)
-#         logging.info(f"Response was sent to {user_data.first_name}.")
+    logging.info("Waiting for response...")
+    async with CLIENT.action(user_data.id, "typing"):
+        await asyncio.sleep(random.randrange(start_range, end_range))
+        await CLIENT.send_message(
+            user_data.id,
+            f"""
+Hello, {user_data.first_name}. \n
+**This message was sent automatically.** \n
+""",
+        )
+        await CLIENT.send_message(user_data.id, response_type)
+        logging.info(f"Response was sent to {user_data.first_name}.")
 
 
 @CLIENT.on(events.NewMessage)
