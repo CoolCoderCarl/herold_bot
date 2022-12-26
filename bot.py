@@ -1,5 +1,4 @@
 import asyncio
-# import codecs
 import logging
 import os
 import random
@@ -21,6 +20,8 @@ CIRCULATION_IDS_FILE = Path("circulation_ids_list.txt")
 # Response
 CIRCULATION_RESPONSE_FILE = Path("circulation_response.txt")
 
+# New Year patterns people use to congratulation someone
+NEW_YEAR_PATTERNS_FILE = Path("new_year_patterns.txt")
 
 # Logging
 logging.basicConfig(
@@ -72,10 +73,44 @@ def load_responses_from_files(file: Path) -> str:
 CIRCULATION_RESPONSE = load_responses_from_files(CIRCULATION_RESPONSE_FILE)
 
 
+def load_patterns_from_files(file: Path) -> List:
+    """
+    Load patterns from the files
+    Try to load from file, if exception caught, send message about err
+    :return:
+    """
+    try:
+        with open(file, encoding="UTF-8") as pattern_file:
+            result = [line.rstrip() for line in pattern_file]
+            logging.info(
+                f"Uploaded response from the {pattern_file.name} done successfully."
+            )
+            return result
+    except FileNotFoundError as file_not_found_err:
+        logging.error(file_not_found_err)
+
+
+NEW_YEAR_PATTERNS = load_patterns_from_files(NEW_YEAR_PATTERNS_FILE)
+
+
 async def show_selected_users():
     async for dialog in CLIENT.iter_dialogs():
         if dialog.id in CIRCULATION_IDS:
             logging.info(f"Selected username: {dialog.name}; ID: {dialog.id}")
+
+
+async def filter_f(event) -> bool:
+    for word in NEW_YEAR_PATTERNS:
+        if word in event.raw_text:
+            return True
+    else:
+        return False
+
+
+@CLIENT.on(events.NewMessage(from_users=CIRCULATION_IDS, func=filter_f))
+async def handler(event):
+    logging.info("Someone send a congratulation")
+    await event.reply(event.message.message)
 
 
 async def send_message_template(
@@ -89,20 +124,22 @@ async def send_message_template(
     )
 
     logging.info("Waiting for response...")
-    async with CLIENT.action(user_data.id, "typing"):
-        await asyncio.sleep(random.randrange(start_range, end_range))
-        await CLIENT.send_message(
-            user_data.id,
-            f"""
-Hello, {user_data.first_name}. \n
-**This message was sent automatically.** \n
-""",
-        )
-        await CLIENT.send_message(user_data.id, response_type)
-        logging.info(f"Response was sent to {user_data.first_name}.")
 
 
-@CLIENT.on(events.NewMessage)
+#     async with CLIENT.action(user_data.id, "typing"):
+#         await asyncio.sleep(random.randrange(start_range, end_range))
+#         await CLIENT.send_message(
+#             user_data.id,
+#             f"""
+# Hello, {user_data.first_name}. \n
+# **This message was sent automatically.** \n
+# """,
+#         )
+#         await CLIENT.send_message(user_data.id, response_type)
+#         logging.info(f"Response was sent to {user_data.first_name}.")
+
+
+@CLIENT.on(events.NewMessage(incoming=True, from_users=CIRCULATION_IDS))
 async def response_to_group(event):
     await show_selected_users()
 
