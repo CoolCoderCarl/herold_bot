@@ -101,16 +101,24 @@ async def show_selected_users():
 
 async def filter_f(event) -> bool:
     for word in NEW_YEAR_PATTERNS:
-        if word in event.raw_text:
+        if word in str(event.raw_text).lower():
             return True
     else:
         return False
 
 
 @CLIENT.on(events.NewMessage(from_users=CIRCULATION_IDS, func=filter_f))
-async def handler(event):
-    logging.info("Someone send a congratulation")
-    await event.reply(event.message.message)
+async def reply_to_congratulations(event):
+    user_data = await event.client.get_entity(event.from_id)
+    logging.info(
+        f"Contact: {user_data.contact} - "
+        f"first name: {user_data.first_name} - "
+        f"ID: {user_data.id} - "
+        f"sent congratulation: {event.message.message}"
+    )
+    async with CLIENT.action(user_data.id, "typing"):
+        await asyncio.sleep(random.randrange(5, 10))
+        await event.reply(event.message.message)
 
 
 async def send_message_template(
@@ -126,6 +134,7 @@ async def send_message_template(
     logging.info("Waiting for response...")
 
 
+# TODO send always
 #     async with CLIENT.action(user_data.id, "typing"):
 #         await asyncio.sleep(random.randrange(start_range, end_range))
 #         await CLIENT.send_message(
