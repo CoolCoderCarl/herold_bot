@@ -43,7 +43,7 @@ def load_ids_from_files(file: Path) -> List[int]:
         with open(file, "r") as users_ids_file:
             result = [int(u_ids) for u_ids in users_ids_file.read().split()]
             logging.info(
-                f"Uploaded ids from the {users_ids_file.name} done successfully."
+                f"Loaded ids from the {users_ids_file.name} done successfully."
             )
             return result
     except FileNotFoundError as file_not_found_err:
@@ -63,7 +63,7 @@ def load_responses_from_files(file: Path) -> str:
         with open(file, "r") as response_file:
             result = response_file.read()
             logging.info(
-                f"Uploaded response from the {response_file.name} done successfully."
+                f"Loaded response from the {response_file.name} done successfully."
             )
             return result
     except FileNotFoundError as file_not_found_err:
@@ -83,7 +83,7 @@ def load_patterns_from_files(file: Path) -> List:
         with open(file, encoding="UTF-8") as pattern_file:
             result = [line.rstrip() for line in pattern_file]
             logging.info(
-                f"Uploaded response from the {pattern_file.name} done successfully."
+                f"Loaded patterns from the {pattern_file.name} done successfully."
             )
             return result
     except FileNotFoundError as file_not_found_err:
