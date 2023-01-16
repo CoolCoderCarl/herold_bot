@@ -13,6 +13,7 @@ services:
     volumes:
       - "/root/herold_bot/circulation_ids_list.txt:/opt/circulation_ids_list.txt"
       - "/root/herold_bot/circulation_response.txt:/opt/circulation_response.txt"
+      - "/root/herold_bot/new_year_patterns.txt:/opt/new_year_patterns.txt"
       - "/root/herold_bot/JustTalk.session:/opt/JustTalk.session"
 volumes:
   herold_bot:
