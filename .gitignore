@@ -131,6 +131,10 @@ dmypy.json
 # List of user ids & answers
 *_list.txt
 *_response.txt
+*.txt
 
 # Session journals
 *.session*
+
+# SQLite
+*.db
