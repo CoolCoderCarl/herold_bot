@@ -16,10 +16,13 @@ META = sqlalchemy.MetaData()
 PEOPLE = sqlalchemy.Table(
     'people', META,
     sqlalchemy.Column('name', sqlalchemy.String),
-    sqlalchemy.Column('date', sqlalchemy.String),
+    sqlalchemy.Column('day_month', sqlalchemy.String),
+    sqlalchemy.Column('year', sqlalchemy.String),
     sqlalchemy.Column('tg_id', sqlalchemy.String),
     sqlalchemy.Column('congrats_file_path', sqlalchemy.String),
 )
+
+# TODO Class & inheritance it
 
 
 def engine(database_name="herold_database.db"):
@@ -37,9 +40,9 @@ def create_db():
         logging.error(f"Err while creating db - {sql_err}")
 
 
-def get_all_people():
+def get_all():
     """
-    Query all rows in the people db table
+    Query all rows from the db
     :return:
     """
     try:
@@ -48,6 +51,14 @@ def get_all_people():
         logging.error(f"Err while fetching from {PEOPLE} db - {sql_err}")
 
 
+# For one type of subclass
+def get_tg_id(current_date) -> str:
+    for d in get_all():
+        if d[1] == current_date:
+            return d[3]
+    return ""
+
+
 if __name__ == "__main__":
-    # print(get_all_people())
+    print(get_tg_id("05.11"))
     pass
