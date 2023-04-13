@@ -14,17 +14,13 @@ logging.basicConfig(
 )
 
 
-def engine_creation(db_name="herold_database.db"):
-    return sqlalchemy.create_engine(f"sqlite:///{db_name}", echo=False)
-
-
-def connect():
-    return engine_creation().connect()
+def connect(db_name="herold_database.db"):
+    return sqlalchemy.create_engine(f"sqlite:///{db_name}", echo=False).connect()
 
 
 def create_db():
     try:
-        models.META.create_all(engine_creation())
+        models.META.create_all(connect())
     except exc.SQLAlchemyError as sql_err:
         logging.error(f"Err while creating db - {sql_err}")
 
