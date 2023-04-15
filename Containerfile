@@ -4,6 +4,7 @@ WORKDIR /opt
 
 COPY ["bot.py", "/opt/"]
 COPY ["db.py", "/opt/"]
+COPY ["models.py", "/opt/"]
 COPY requirements.txt requirements.txt
 
 RUN pip3 install --no-cache-dir -r requirements.txt

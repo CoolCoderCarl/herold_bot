@@ -5,7 +5,8 @@ services:
     container_name: herold_bot
     image: h0d0user/herold_bot:latest
     restart: always
-    network_mode: herold_net
+    networks:
+      - herold_net
     environment:
       - API_ID=YOURAPIID
       - API_HASH=YOURAPIHASH
