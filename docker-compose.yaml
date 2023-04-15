@@ -5,7 +5,7 @@ services:
     container_name: herold_bot
     image: h0d0user/herold_bot:latest
     restart: always
-    network_mode: host
+    network_mode: herold_net
     environment:
       - API_ID=YOURAPIID
       - API_HASH=YOURAPIHASH
@@ -14,5 +14,9 @@ services:
       - "/root/herold_bot/herold_database.db:/opt/herold_database.db"
       - "/root/herold_bot/congrats_file.txt:/opt/congrats_file.txt"
       - "/root/herold_bot/JustTalk.session:/opt/JustTalk.session"
+
 volumes:
   herold_bot:
+
+networks:
+  herold_net:
