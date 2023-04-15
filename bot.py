@@ -1,12 +1,15 @@
-import asyncio
 import codecs
 import logging
 import os
 import random
+import time
+from datetime import datetime
 from pathlib import Path
 from typing import List
 
-from telethon import TelegramClient, events
+from telethon import TelegramClient
+
+import db
 
 # Environment variables
 API_ID = os.environ["API_ID"]
@@ -24,47 +27,51 @@ logging.basicConfig(
 )
 
 
-def load_responses_from_files(file: Path) -> str:
+def load_congrats_from_files(file: Path) -> List:
     """
-    Load responses from the files
+    Load congrats from the file
     Try to load from file, if exception caught, send message about err
     :return:
     """
     try:
-        with codecs.open(file, "r", "utf-8") as response_file:
-            result = response_file.read()
-            logging.info(
-                f"Uploaded response from the {response_file.name} done successfully."
-            )
+        with codecs.open(Path(file), "r", "utf-8") as file:
+            result = file.readlines()
+            logging.info(f"Uploaded response from the {file.name} done successfully.")
             return result
     except FileNotFoundError as file_not_found_err:
         logging.error(f"Err while load file - {file_not_found_err}")
         return None
 
 
-async def send_message_template(user_data, event, start_range, end_range):
-    logging.info(
-        f"Contact: {user_data.contact} -"
-        f"username: {user_data.first_name} - "
-        f"ID: {user_data.id} - "
-        f"sent message: {event.message.message}"
-    )
-    logging.info("Waiting for response...")
-    async with CLIENT.action(user_data.id, "typing"):
-        await asyncio.sleep(random.randrange(start_range, end_range))
-        await CLIENT.send_message(
-            user_data.id,
-            f"""
-Hello, {user_data.first_name}. \n
-**This message was sent automatically.** \n
-""",
+CONGRATULATIONS_FILE = load_congrats_from_files(Path("congrats_file.txt"))
+
+
+async def send_congratulations():
+    """
+    Send congratulations if date is correct
+    Wait for one day to check date
+    :return:
+    """
+    current_date = datetime.today().strftime("%m.%d")
+    if db.get_tg_id(current_date) is None:
+        logging.info(f"Today - {current_date} - are no one to congratulate")
+        time.sleep(86400)
+    else:
+        user_data = await CLIENT.get_entity(db.get_tg_id(current_date))
+        logging.info(
+            f"Today - {current_date} - going to congratulate {user_data.first_name} - {user_data.username}"
         )
         await CLIENT.send_message(
-            user_data.id,
+            db.get_tg_id(current_date), random.choice(CONGRATULATIONS_FILE)
         )
-        logging.info(f"Response was sent to {user_data.first_name}.")
+        time.sleep(86400)
+
+
+async def main():
+    while True:
+        await send_congratulations()
 
 
 if __name__ == "__main__":
-    CLIENT.start()
-    CLIENT.run_until_disconnected()
+    with CLIENT:
+        CLIENT.loop.run_until_complete(main())

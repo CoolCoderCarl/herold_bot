@@ -39,10 +39,12 @@ def get_all_rows():
 def get_tg_id(current_date) -> str:
     for d in get_all_rows():
         if d[1] == current_date:
+            logging.info(f"{d[1]} = {current_date}")
             return d[3]
     return None
 
 
+# TODO Add update db from file
+
 if __name__ == "__main__":
-    print(get_tg_id("05.11"))
     pass
