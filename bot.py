@@ -1,3 +1,4 @@
+import asyncio
 import codecs
 import logging
 import os
@@ -9,6 +10,7 @@ from typing import List
 
 from telethon import TelegramClient
 
+import bucket
 import db
 
 # Environment variables
@@ -64,11 +66,16 @@ async def send_congratulations():
         await CLIENT.send_message(
             db.get_tg_id(current_date), random.choice(CONGRATULATIONS_FILE)
         )
-    # await CLIENT.send_file(db.get_tg_id(current_date), path_to_file)
+        async with CLIENT.action(user_data.id, "typing"):
+            await asyncio.sleep(random.randrange(2, 5))
+            await CLIENT.send_file(
+                db.get_tg_id(current_date),
+                bucket.download_file_from_bucket(Path("/opt/")),
+            )
     time.sleep(86400)
 
 
-async def main():
+def main():
     while True:
         await send_congratulations()
 
