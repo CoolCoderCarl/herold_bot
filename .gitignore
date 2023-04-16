@@ -139,3 +139,11 @@ dmypy.json
 
 # SQLite
 *.db
+
+# Bucket objects
+birthdays/
+*.jpg
+*.png
+
+# Dynaconf
+*.toml
