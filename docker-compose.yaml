@@ -15,6 +15,7 @@ services:
       - "/root/herold_bot/herold_database.db:/opt/herold_database.db"
       - "/root/herold_bot/congrats_file.txt:/opt/congrats_file.txt"
       - "/root/herold_bot/JustTalk.session:/opt/JustTalk.session"
+      - "/root/herold_bot/settings.toml:/opt/settings.toml"
 
 volumes:
   herold_bot:
