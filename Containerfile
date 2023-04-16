@@ -3,6 +3,10 @@ FROM python:3.9-alpine as builder
 WORKDIR /opt
 
 COPY ["bot.py", "/opt/"]
+COPY ["db.py", "/opt/"]
+COPY ["models.py", "/opt/"]
+COPY ["bucket.py", "/opt/"]
+COPY ["dynaconfig.py", "/opt/"]
 COPY requirements.txt requirements.txt
 
 RUN pip3 install --no-cache-dir -r requirements.txt
