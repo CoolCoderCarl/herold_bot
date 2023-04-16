@@ -75,7 +75,7 @@ async def send_congratulations():
     time.sleep(86400)
 
 
-def main():
+async def main():
     while True:
         await send_congratulations()
 
