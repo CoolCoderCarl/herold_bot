@@ -18,7 +18,7 @@ services:
       - "/root/herold_bot/settings.toml:/opt/settings.toml"
 
 volumes:
-  herold_bot:
+  herold_volume:
 
 networks:
   herold_net:
