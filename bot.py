@@ -64,7 +64,8 @@ async def send_congratulations():
         await CLIENT.send_message(
             db.get_tg_id(current_date), random.choice(CONGRATULATIONS_FILE)
         )
-        time.sleep(86400)
+    # await CLIENT.send_file(db.get_tg_id(current_date), path_to_file)
+    time.sleep(86400)
 
 
 async def main():
