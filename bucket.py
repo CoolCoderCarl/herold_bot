@@ -70,7 +70,11 @@ def get_random_object(search_dir: str) -> str:
 
 
 def download_file_from_bucket(target_dir: Path):
-    # random_file = ""
+    """
+    Download random file from bucket
+    :param target_dir:
+    :return:
+    """
     try:
         random_file = get_random_object("birthdays")
         CLIENT.download_file(BUCKET_NAME, random_file, target_dir)
@@ -79,6 +83,24 @@ def download_file_from_bucket(target_dir: Path):
         return random_file
     except Exception as err:
         logging.error(f"File not downloaded ! - {err}")
+
+
+def prune_directory(directory_to_prune: Path):
+    """
+    Need to prune directory after downloading to evade container enlargement
+    :param directory_to_prune:
+    :return:
+    """
+    try:
+        for file in os.listdir(directory_to_prune):
+            os.remove(os.path.join(directory_to_prune, file))
+        logging.info(f"Directory {directory_to_prune} was pruned !")
+    except FileNotFoundError as dir_not_found:
+        logging.error(
+            f"Directory {directory_to_prune} was not pruned - {dir_not_found}"
+        )
+    except Exception as err:
+        logging.error(f"Directory {directory_to_prune} was not pruned - {err}")
 
 
 if __name__ == "__main__":
