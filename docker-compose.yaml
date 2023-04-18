@@ -5,15 +5,20 @@ services:
     container_name: herold_bot
     image: h0d0user/herold_bot:latest
     restart: always
-    network_mode: host
+    networks:
+      - herold_net
     environment:
       - API_ID=YOURAPIID
       - API_HASH=YOURAPIHASH
       - SESSION=YOURSESSION
     volumes:
-      - "/root/herold_bot/circulation_ids_list.txt:/opt/circulation_ids_list.txt"
-      - "/root/herold_bot/circulation_response.txt:/opt/circulation_response.txt"
-      - "/root/herold_bot/new_year_patterns.txt:/opt/new_year_patterns.txt"
+      - "/root/herold_bot/herold_database.db:/opt/herold_database.db"
+      - "/root/herold_bot/congrats_list.txt:/opt/congrats_list.txt"
       - "/root/herold_bot/JustTalk.session:/opt/JustTalk.session"
+      - "/root/herold_bot/settings.toml:/opt/settings.toml"
+
 volumes:
-  herold_bot:
+  herold_volume:
+
+networks:
+  herold_net:

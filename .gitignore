@@ -131,7 +131,19 @@ dmypy.json
 # List of user ids & answers
 *_list.txt
 *_response.txt
+*_file.txt
 *_patterns.txt
 
 # Session journals
 *.session*
+
+# SQLite
+*.db
+
+# Bucket objects
+birthdays/
+*.jpg
+*.png
+
+# Dynaconf
+settings.toml
