@@ -131,7 +131,7 @@ dmypy.json
 # List of user ids & answers
 *_list.txt
 *_response.txt
-
+*_file.txt
 *_patterns.txt
 
 # Session journals
