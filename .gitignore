@@ -132,7 +132,7 @@ dmypy.json
 *_list.txt
 *_response.txt
 
-*.txt
+*_patterns.txt
 
 # Session journals
 *.session*
@@ -146,4 +146,4 @@ birthdays/
 *.png
 
 # Dynaconf
-*.toml
+settings.toml
