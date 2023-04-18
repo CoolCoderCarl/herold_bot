@@ -1,9 +1,10 @@
 import sqlalchemy
 
-META = sqlalchemy.MetaData()
-PEOPLE = sqlalchemy.Table(
+meta = sqlalchemy.MetaData()
+
+birthdays = sqlalchemy.Table(
     "people",
-    META,
+    meta,
     sqlalchemy.Column("name", sqlalchemy.String),
     sqlalchemy.Column("day_month", sqlalchemy.String),
     sqlalchemy.Column("year", sqlalchemy.String),

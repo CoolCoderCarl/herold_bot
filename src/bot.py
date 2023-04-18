@@ -1,5 +1,4 @@
 import asyncio
-import codecs
 import logging
 import os
 import random
@@ -18,7 +17,7 @@ API_ID = os.environ["API_ID"]
 API_HASH = os.environ["API_HASH"]
 SESSION = os.environ["SESSION"]
 
-CLIENT = TelegramClient(SESSION, API_ID, API_HASH)
+client = TelegramClient(SESSION, API_ID, API_HASH)
 
 # Logging
 logging.basicConfig(
@@ -29,14 +28,14 @@ logging.basicConfig(
 )
 
 
-def load_congrats_from_files(file: Path) -> List:
+def load_congrats_from_file(file: Path) -> List[str]:
     """
     Load congrats from the file
     Try to load from file, if exception caught, send message about err
     :return:
     """
     try:
-        with codecs.open(Path(file), "r", "utf-8") as file:
+        with open(Path(file), "r", encoding="utf-8") as file:
             result = file.readlines()
             logging.info(f"Uploaded response from the {file.name} done successfully.")
             return result
@@ -45,12 +44,12 @@ def load_congrats_from_files(file: Path) -> List:
         return None
 
 
-CONGRATULATIONS_FILE = load_congrats_from_files(Path("congrats_file.txt"))
+CONGRATULATIONS = load_congrats_from_file(Path("congrats_list.txt"))
 
 
 async def send_congratulations():
     """
-    Send congratulations if date is correct
+    Check if someone has a birthday on this date then send congratulation
     Wait for one day to check date
     :return:
     """
@@ -59,16 +58,16 @@ async def send_congratulations():
         logging.info(f"Today - {current_date} - are no one to congratulate")
         time.sleep(86400)
     else:
-        user_data = await CLIENT.get_entity(db.get_tg_id(current_date))
+        user_data = await client.get_entity(db.get_tg_id(current_date))
         logging.info(
             f"Today - {current_date} - going to congratulate {user_data.first_name} - {user_data.username}"
         )
-        await CLIENT.send_message(
-            db.get_tg_id(current_date), random.choice(CONGRATULATIONS_FILE)
+        await client.send_message(
+            db.get_tg_id(current_date), random.choice(CONGRATULATIONS)
         )
-        async with CLIENT.action(user_data.id, "typing"):
+        async with client.action(user_data.id, "typing"):
             await asyncio.sleep(random.randrange(2, 5))
-            await CLIENT.send_file(
+            await client.send_file(
                 db.get_tg_id(current_date),
                 bucket.download_file_from_bucket(Path("/home/")),
             )
@@ -83,5 +82,5 @@ async def main():
 
 
 if __name__ == "__main__":
-    with CLIENT:
-        CLIENT.loop.run_until_complete(main())
+    with client:
+        client.loop.run_until_complete(main())

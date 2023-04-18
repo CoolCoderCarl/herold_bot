@@ -25,6 +25,9 @@ CLIENT = session.client(
     aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
 )
 
+# transfer = S3Transfer(CLIENT)
+# transfer.upload_file("filetoupload", BUCKET_NAME, "filedest")
+
 # Logging
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO
@@ -41,7 +44,7 @@ def filter_conf(dir_to_filter):
     :return:
     """
 
-    def check_dir(directory: str):
+    def check_dir(directory: str) -> bool:
         """
         Check the needed directory
         :param directory:
@@ -69,7 +72,8 @@ def get_random_object(search_dir: str) -> str:
     return random.choices(list(result)[1:])[0].split("/")[1]
 
 
-def download_file_from_bucket(target_dir: Path):
+# TODO input param for dir - birthdays for now
+def download_file_from_bucket(target_dir: Path) -> str:
     """
     Download random file from bucket
     :param target_dir:
