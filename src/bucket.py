@@ -16,7 +16,7 @@ REGION_NAME = dynaconfig.settings["REGION_NAME"]
 AWS_ACCESS_KEY_ID = dynaconfig.settings["AWS_ACCESS_KEY_ID"]
 AWS_SECRET_ACCESS_KEY = dynaconfig.settings["AWS_SECRET_ACCESS_KEY"]
 
-CLIENT = session.client(
+client = session.client(
     "s3",
     endpoint_url=ENDPOINT_URL,
     config=botocore.config.Config(s3={"addressing_style": "virtual"}),
@@ -25,8 +25,6 @@ CLIENT = session.client(
     aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
 )
 
-# transfer = S3Transfer(CLIENT)
-# transfer.upload_file("filetoupload", BUCKET_NAME, "filedest")
 
 # Logging
 logging.basicConfig(
@@ -61,7 +59,7 @@ def get_random_object(search_dir: str) -> str:
     :param search_dir:
     :return:
     """
-    response = CLIENT.list_objects(Bucket=BUCKET_NAME)
+    response = client.list_objects(Bucket=BUCKET_NAME)
     result = []
     for obj in response["Contents"]:
         result.append(obj["Key"])
@@ -72,21 +70,22 @@ def get_random_object(search_dir: str) -> str:
     return random.choices(list(result)[1:])[0].split("/")[1]
 
 
-# TODO input param for dir - birthdays for now
-def download_file_from_bucket(target_dir: Path) -> str:
+def download_file_from_bucket(remote_directory: str, local_directory: Path) -> str:
     """
     Download random file from bucket
-    :param target_dir:
+    :param remote_directory:
+    :param local_directory:
     :return:
     """
     try:
-        random_file = get_random_object("birthdays")
-        CLIENT.download_file(BUCKET_NAME, random_file, target_dir)
-        logging.info(f"File {random_file} downloaded to f{target_dir}")
-        logging.info(f"Directory {target_dir} - {os.listdir(target_dir)}")
+        random_file = get_random_object(remote_directory)
+        client.download_file(BUCKET_NAME, random_file, local_directory)
+        logging.info(f"File {random_file} downloaded to f{local_directory}")
+        logging.info(f"Directory {local_directory} - {os.listdir(local_directory)}")
         return random_file
     except Exception as err:
         logging.error(f"File not downloaded ! - {err}")
+        return None
 
 
 def prune_directory(directory_to_prune: Path):

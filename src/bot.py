@@ -69,7 +69,7 @@ async def send_congratulations():
             await asyncio.sleep(random.randrange(2, 5))
             await client.send_file(
                 db.get_tg_id(current_date),
-                bucket.download_file_from_bucket(Path("/home/")),
+                bucket.download_file_from_bucket("birthdays", Path("/home/")),
             )
     time.sleep(400)
     bucket.prune_directory(Path("/home/"))

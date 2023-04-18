@@ -49,7 +49,5 @@ def get_tg_id(current_date) -> str:
     return None
 
 
-# TODO Add update db from file
-
 if __name__ == "__main__":
     pass
